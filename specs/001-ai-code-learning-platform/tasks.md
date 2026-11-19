@@ -306,32 +306,32 @@ Web application structure (from plan.md):
 
 ### Backend: Practice Models & Generation
 
-- [ ] T115 Create PracticeProblem SQLAlchemy model in backend/src/models/practice_problem.py (must match T009 migration schema)
-- [ ] T116 Implement practice problem generation prompts in backend/src/services/ai/prompts.py
-- [ ] T117 Implement PracticeGenerationService (generate 5 problems with hints) in backend/src/services/practice/practice_generation_service.py
-- [ ] T118 Implement Celery task for async practice generation in backend/src/tasks/practice_generation.py
-- [ ] T119 Add practice generation trigger after document generation in document_generation.py
+- [X] T115 Create PracticeProblem SQLAlchemy model in backend/src/models/practice_problem.py (must match T009 migration schema)
+- [X] T116 Implement practice problem generation prompts in backend/src/services/ai/prompts.py
+- [X] T117 Implement PracticeGenerationService (generate 5 problems with hints) in backend/src/services/practice/practice_generation_service.py
+- [X] T118 Implement Celery task for async practice generation in backend/src/tasks/practice_generation.py
+- [X] T119 Add practice generation trigger after document generation in document_generation.py
 
 ### Backend: Practice API Endpoints
 
-- [ ] T120 Implement GET /tasks/{task_id}/practice endpoint in backend/src/api/practice.py
-- [ ] T121 Implement GET /tasks/{task_id}/practice/{problem_number} endpoint in backend/src/api/practice.py
+- [X] T120 Implement GET /tasks/{task_id}/practice endpoint in backend/src/api/practice.py
+- [X] T121 Implement GET /tasks/{task_id}/practice/{problem_number} endpoint in backend/src/api/practice.py
 
 ### Frontend: Practice UI
 
-- [ ] T122 [P] Create ProblemCard component with difficulty badge in frontend/src/components/practice/ProblemCard.tsx
-- [ ] T123 [P] Create HintReveal component (progressive hints) in frontend/src/components/practice/HintReveal.tsx
-- [ ] T124 [P] Create SolutionDisplay component (hidden until requested) in frontend/src/components/practice/SolutionDisplay.tsx
-- [ ] T125 Create PracticeViewer component with 5 problems in frontend/src/components/practice/PracticeViewer.tsx
-- [ ] T126 Create practice service (fetch problems) in frontend/src/services/practice-service.ts
-- [ ] T127 Add Practice tab content to TaskDetail page in frontend/src/pages/TaskDetail.tsx
+- [X] T122 [P] Create ProblemCard component with difficulty badge in frontend/src/components/practice/ProblemCard.tsx
+- [X] T123 [P] Create HintReveal component (progressive hints) in frontend/src/components/practice/HintReveal.tsx
+- [X] T124 [P] Create SolutionDisplay component (hidden until requested) in frontend/src/components/practice/SolutionDisplay.tsx
+- [X] T125 Create PracticeViewer component with 5 problems in frontend/src/components/practice/PracticeViewer.tsx
+- [X] T126 Create practice service (fetch problems) in frontend/src/services/practice-service.ts
+- [X] T127 Add Practice tab content to TaskDetail page in frontend/src/pages/TaskDetail.tsx
 
 ### Browser Testing: Practice Problems
 
-- [ ] T128 Manual browser test: Navigate to Practice tab → verify 5 problems display with types (Follow Along, Fill Blanks, Modify, Debug, Create)
-- [ ] T129 Manual browser test: Click "Show Hints" → verify progressive hint reveal
-- [ ] T130 Manual browser test: Click "Show Solution" → verify model solution displays
-- [ ] T131 Manual browser test: Mark problem as complete → verify completion badge appears
+- [X] T128 Manual browser test: Navigate to Practice tab → verify 5 problems display with types (Follow Along, Fill Blanks, Modify, Debug, Create) (verified via Playwright MCP 2026-11-19: all 5 problems rendered with the correct English difficulty labels in order)
+- [X] T129 Manual browser test: Click "Show Hints" → verify progressive hint reveal (verified via Playwright MCP 2026-11-19: "힌트 보기 (0/2)" → 1 hint shown + "(1/2)" → 2nd hint shown + button disappears)
+- [X] T130 Manual browser test: Click "Show Solution" → verify model solution displays (verified via Playwright MCP 2026-11-19: clicking "정답 보기" reveals the model solution code and expected output, button disappears)
+- [ ] T131 Manual browser test: Mark problem as complete → verify completion badge appears (deferred — completion tracking is Phase 9 Progress; no "mark complete" UI exists yet in PracticeViewer/ProblemCard, same scope boundary as T131's dependency on Phase 9)
 
 **Checkpoint**: Complete practice problem system working in browser
 

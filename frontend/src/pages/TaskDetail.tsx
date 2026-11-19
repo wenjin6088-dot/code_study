@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { DocumentViewer } from '../components/document/DocumentViewer'
+import { PracticeViewer } from '../components/practice/PracticeViewer'
 import { getTask } from '../services/task-service'
 
 const TABS = ['Document', 'Practice', 'Q&A'] as const
@@ -43,7 +44,7 @@ function TaskDetail() {
       </div>
       <div role="tabpanel">
         {activeTab === 'Document' && <DocumentViewer taskId={taskId as string} />}
-        {activeTab === 'Practice' && <p>실습 탭 (준비 중)</p>}
+        {activeTab === 'Practice' && <PracticeViewer taskId={taskId as string} />}
         {activeTab === 'Q&A' && <p>Q&A 탭 (준비 중)</p>}
       </div>
     </div>

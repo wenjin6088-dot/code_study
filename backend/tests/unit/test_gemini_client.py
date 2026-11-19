@@ -1,6 +1,8 @@
+import json
 from types import SimpleNamespace
 
 import pytest
+import requests
 from google.genai import errors
 
 from src.services.ai.gemini_client import (
@@ -158,12 +160,19 @@ class TestGenerateJson:
             await client.generate_json("p")
 
 
+def _fake_response(code: int, message: str) -> requests.Response:
+    response = requests.Response()
+    response.status_code = code
+    response._content = json.dumps({"error": {"message": message}}).encode()
+    return response
+
+
 def _server_error(code: int) -> errors.ServerError:
-    return errors.ServerError(code, {"error": {"message": f"server {code}"}})
+    return errors.ServerError(code, _fake_response(code, f"server {code}"))
 
 
 def _client_error(code: int) -> errors.ClientError:
-    return errors.ClientError(code, {"error": {"message": f"client {code}"}})
+    return errors.ClientError(code, _fake_response(code, f"client {code}"))
 
 
 class TestErrorTranslation:

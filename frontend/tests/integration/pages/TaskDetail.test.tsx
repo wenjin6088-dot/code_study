@@ -33,6 +33,14 @@ vi.mock('@/components/document/DocumentViewer', () => ({
   ),
 }))
 
+// PracticeViewer (T125) renders the real Practice tab content (T127). Mocked
+// here for the same reason as DocumentViewer above.
+vi.mock('@/components/practice/PracticeViewer', () => ({
+  PracticeViewer: ({ taskId }: { taskId: string }) => (
+    <div data-testid="practice-viewer">{taskId}</div>
+  ),
+}))
+
 const mockedGetTask = taskService.getTask as unknown as ReturnType<typeof vi.fn>
 
 const task1 = {
@@ -153,6 +161,17 @@ describe('TaskDetail page', () => {
 
     await screen.findByText('My First Task')
     expect(screen.getByTestId('document-viewer')).toHaveTextContent('task-1')
+  })
+
+  it('should render the PracticeViewer in the Practice tab with the task id', async () => {
+    mockedGetTask.mockResolvedValueOnce(task1)
+
+    renderTaskDetail('project-1', 'task-1')
+
+    await screen.findByText('My First Task')
+    fireEvent.click(screen.getByRole('tab', { name: 'Practice' }))
+
+    expect(screen.getByTestId('practice-viewer')).toHaveTextContent('task-1')
   })
 
   it('should show a not-found message when the task cannot be fetched (404)', async () => {
