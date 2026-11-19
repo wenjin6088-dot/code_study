@@ -29,6 +29,7 @@ coverage/
 # Uploaded code files (user data, not source)
 storage/uploads/*
 !storage/uploads/.gitkeep
+backend/storage/
 
 # Logs
 *.log
