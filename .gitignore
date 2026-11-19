@@ -1,0 +1,49 @@
+# Python (backend)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+venv/
+.venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Environment variables (keep the template tracked)
+.env
+.env.*
+!.env.example
+
+# Uploaded code files (user data, not source)
+storage/uploads/*
+!storage/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# Local agent tooling (machine-specific, not shared)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.playwright-mcp/
+.omc/
