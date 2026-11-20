@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { login, type AuthUser } from '../../services/auth-service'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -41,27 +42,35 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="login-email">Email</label>
-        <input
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label htmlFor="login-email" className="text-sm font-medium leading-none">
+          Email
+        </label>
+        <Input
           id="login-email"
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="login-password">Password</label>
-        <input
+      <div className="space-y-1.5">
+        <label htmlFor="login-password" className="text-sm font-medium leading-none">
+          Password
+        </label>
+        <Input
           id="login-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      {error && <p role="alert">{error}</p>}
-      <Button type="submit" disabled={isSubmitting}>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+      <Button type="submit" disabled={isSubmitting} className="w-full">
         Login
       </Button>
     </form>
