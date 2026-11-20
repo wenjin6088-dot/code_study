@@ -194,3 +194,88 @@ placeholders describing what to write):
     return PromptBundle(
         system_instruction=DOCUMENT_SYSTEM_INSTRUCTION, user_prompt=user_prompt
     )
+
+
+# FR-049: problems must appear in this exact increasing-difficulty order.
+PRACTICE_PROBLEM_TYPES: tuple[str, ...] = (
+    "follow_along",
+    "fill_blanks",
+    "modify",
+    "debug",
+    "create",
+)
+
+PRACTICE_SYSTEM_INSTRUCTION = (
+    "You are an expert teacher creating practice exercises for complete "
+    "beginners with zero programming knowledge, based on code they just "
+    "studied. Every exercise must be solvable using only the concepts "
+    "already present in that code; never require knowledge the code does "
+    "not demonstrate. Problems are text-only (no in-browser code "
+    "execution). Respond with a single JSON object only: no markdown, no "
+    "prose outside the JSON."
+)
+
+_PRACTICE_SCHEMA_EXAMPLE = {
+    "problems": [
+        {
+            "problem_number": number,
+            "problem_type": problem_type,
+            "problem_statement": "What the learner must do, in plain language.",
+            "learning_objective": "What this problem teaches.",
+            "hints": ["First, gentle nudge.", "Second, more specific hint."],
+            "model_solution": "A complete, correct solution.",
+            "expected_output": "What running the solution should produce.",
+        }
+        for number, problem_type in enumerate(PRACTICE_PROBLEM_TYPES, 1)
+    ]
+}
+
+_PRACTICE_RULES = f"""\
+Problem rules:
+- Return exactly 5 problems, "problem_number" 1 through 5, one per entry in \
+{PRACTICE_PROBLEM_TYPES}, in that exact order (increasing difficulty).
+- "problem_statement" and "learning_objective" must be beginner-friendly, no \
+unexplained jargon.
+- "hints" is an array of at least 2 progressively more specific hints; the \
+first hint must not give away the solution.
+- "model_solution" must be a complete, correct solution using only concepts \
+from the source code.
+- "expected_output" describes what the learner should see when the solution \
+is correct.
+- Problems must be solvable without running code in a browser (text-only, \
+FR-056)."""
+
+
+def build_practice_prompt(
+    files: list[CodeFileInput],
+    *,
+    detected_language: str,
+    complexity_level: str,
+    output_language: str = "Korean",
+) -> PromptBundle:
+    if not any(file.content.strip() for file in files):
+        raise ValueError("At least one non-empty code file is required")
+
+    schema = json.dumps(_PRACTICE_SCHEMA_EXAMPLE, indent=2, ensure_ascii=False)
+    user_prompt = f"""\
+Create exactly 5 practice problems based on the code below, so a beginner can \
+apply what they just learned.
+
+Context:
+- Programming language: {detected_language}
+- Complexity level: {complexity_level}
+- Write all explanations in {output_language}. Keep code, identifiers and JSON \
+keys exactly as they are.
+- Line numbers are shown as "N: " prefixes; they are not part of the code.
+
+Source code:
+{format_code_files(files)}
+
+{_PRACTICE_RULES}
+
+Return exactly this JSON structure (same keys, same nesting; the string values \
+are placeholders describing what to write):
+{schema}"""
+    return PromptBundle(
+        system_instruction=PRACTICE_SYSTEM_INSTRUCTION, user_prompt=user_prompt
+    )

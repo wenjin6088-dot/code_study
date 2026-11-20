@@ -13,13 +13,14 @@ running Celery worker or a real Gemini API key.
 
 import asyncio
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Protocol
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.session import AsyncSessionLocal
+from src.db.session import AsyncSessionLocal, engine
 from src.models.code_file import CodeFile
 from src.models.learning_document import LearningDocument
 
@@ -39,6 +40,15 @@ from src.tasks.celery_app import celery_app
 
 DEFAULT_DETECTED_LANGUAGE = "unknown"
 DEFAULT_COMPLEXITY_LEVEL = "beginner"
+
+PracticeEnqueueFn = Callable[[uuid.UUID], None]
+
+
+def _default_enqueue_practice(task_id: uuid.UUID) -> None:
+    # T119: successful document generation triggers practice generation.
+    from src.tasks.practice_generation import generate_practice_task
+
+    generate_practice_task.delay(str(task_id))
 
 
 class DocumentGenerationTaskError(Exception):
@@ -101,6 +111,7 @@ async def generate_document_async(
     session: AsyncSession,
     *,
     document_service: DocumentServiceProtocol,
+    enqueue_practice: PracticeEnqueueFn | None = None,
 ) -> None:
     """Drive one task's document generation end to end and persist every
     status transition (FR-094: clear error message on terminal failure).
@@ -144,11 +155,21 @@ async def generate_document_async(
     document.generation_completed_at = datetime.now(UTC)
     await session.commit()
 
+    (enqueue_practice or _default_enqueue_practice)(task_id)
+
 
 async def _run(task_id: uuid.UUID) -> None:
     async with AsyncSessionLocal() as session:
         service = DocumentGenerationService(GeminiClient())
         await generate_document_async(task_id, session, document_service=service)
+    # The engine/pool is a module-level singleton shared across every
+    # asyncio.run() call below, but each call gets a brand-new event loop.
+    # asyncpg's pooled connections are bound to the loop they were opened
+    # on, so a connection checked out under a later loop breaks (Windows
+    # ProactorEventLoop: "AttributeError: 'NoneType' object has no
+    # attribute 'send'"). Disposing after every run forces a fresh pool
+    # for the next asyncio.run().
+    await engine.dispose()
 
 
 @celery_app.task(name="src.tasks.document_generation.generate_document_task")
