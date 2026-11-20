@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { register, type AuthUser } from '../../services/auth-service'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -47,36 +48,46 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="register-email">Email</label>
-        <input
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label htmlFor="register-email" className="text-sm font-medium leading-none">
+          Email
+        </label>
+        <Input
           id="register-email"
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="register-password">Password</label>
-        <input
+      <div className="space-y-1.5">
+        <label htmlFor="register-password" className="text-sm font-medium leading-none">
+          Password
+        </label>
+        <Input
           id="register-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="register-confirm-password">Confirm Password</label>
-        <input
+      <div className="space-y-1.5">
+        <label htmlFor="register-confirm-password" className="text-sm font-medium leading-none">
+          Confirm Password
+        </label>
+        <Input
           id="register-confirm-password"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
-      {error && <p role="alert">{error}</p>}
-      <Button type="submit" disabled={isSubmitting}>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+      <Button type="submit" disabled={isSubmitting} className="w-full">
         Register
       </Button>
     </form>
