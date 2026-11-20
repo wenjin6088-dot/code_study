@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +19,15 @@ from src.services.auth.token_service import TokenPair, TokenService
 from src.services.auth.user_service import UserService
 
 REFRESH_TOKEN_COOKIE_NAME = "refresh_token"
+
+# The frontend and backend are deployed on different subdomains in production
+# (and therefore different sites for cookie purposes), so the auth cookies
+# must use SameSite=None to be sent on cross-site requests. Browsers reject
+# SameSite=None cookies without Secure, so the two are tied together. Local
+# dev runs both on http://localhost (same site), where Lax already works and
+# Secure would block the cookie over plain HTTP.
+COOKIE_SAMESITE = os.environ.get("COOKIE_SAMESITE", "lax")
+COOKIE_SECURE = COOKIE_SAMESITE == "none"
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -69,13 +80,15 @@ def _set_auth_cookies(response: Response, tokens: TokenPair) -> None:
         ACCESS_TOKEN_COOKIE_NAME,
         tokens.access_token,
         httponly=True,
-        samesite="lax",
+        samesite=COOKIE_SAMESITE,
+        secure=COOKIE_SECURE,
     )
     response.set_cookie(
         REFRESH_TOKEN_COOKIE_NAME,
         tokens.refresh_token,
         httponly=True,
-        samesite="lax",
+        samesite=COOKIE_SAMESITE,
+        secure=COOKIE_SECURE,
     )
 
 
@@ -124,8 +137,12 @@ async def logout(
     refresh_token = _first_cookie_value(request, REFRESH_TOKEN_COOKIE_NAME)
     if refresh_token:
         await UserService(session).logout(refresh_token)
-    response.delete_cookie(ACCESS_TOKEN_COOKIE_NAME, samesite="lax")
-    response.delete_cookie(REFRESH_TOKEN_COOKIE_NAME, samesite="lax")
+    response.delete_cookie(
+        ACCESS_TOKEN_COOKIE_NAME, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE
+    )
+    response.delete_cookie(
+        REFRESH_TOKEN_COOKIE_NAME, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE
+    )
 
 
 @router.post("/refresh")
